@@ -1,5 +1,7 @@
 # VNect -- Tensorflow version
-This project is focused on tensorflow implementation of [VNect: Real-time 3D Human Pose Estimation with a Single RGB Camera](http://gvv.mpi-inf.mpg.de/projects/VNect/), SIGGRAPH 2017.
+This project is the tensorflow implementation of [VNect: Real-time 3D Human Pose Estimation with a Single RGB Camera](http://gvv.mpi-inf.mpg.de/projects/VNect/), SIGGRAPH 2017.
+
+If you find any question regarding to this project please directly contact to me or open an issue.
 
 ## Environments
 - Ubuntu 16.04
@@ -17,6 +19,7 @@ I converted the original caffe model into [tensorflow model](https://drive.googl
 - 3.If you have OpenGL, you can run `run_demo_tf_gl.sh` for faster rendering of 3d joints. Otherwise, run `run_demo_tf.sh`
 
 # TODO
-Training part of your own model.
+ - Some bugs in detected 3D joint locations.
+ - Training part of model.
 
 
