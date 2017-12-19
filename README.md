@@ -1,6 +1,7 @@
 # VNect -- Tensorflow version
 This project is the tensorflow implementation of [VNect: Real-time 3D Human Pose Estimation with a Single RGB Camera](http://gvv.mpi-inf.mpg.de/projects/VNect/), SIGGRAPH 2017.
 
+This is not an official implementation.
 If you find any question regarding to this project please directly contact to me or open an issue.
 
 ## Environments
@@ -9,9 +10,6 @@ If you find any question regarding to this project please directly contact to me
 - Tensorflow 1.3.0
 - OpenCV 3.3.0
 - OpenGL (optional)
-
-## Model file
-I converted the original caffe model into [tensorflow model](https://drive.google.com/open?id=1ETbIKHulW0ZhMZIfb_nFcQr-0InqWGor)
 
 ## Inference
 - 1.Download model, put them in folder `models/weights`
