@@ -11,7 +11,7 @@ import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', default='gpu')
-parser.add_argument('--model_dir', default='/media/tim_ho/HDD1/Projects/VNect-tensorflow/models')
+parser.add_argument('--model_dir', default='')
 parser.add_argument('--input_size', default=368)
 parser.add_argument('--num_of_joints', default=21)
 parser.add_argument('--pool_scale', default=8)
