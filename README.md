@@ -1,8 +1,7 @@
 # VNect -- Tensorflow version
 This project is the tensorflow implementation of [VNect: Real-time 3D Human Pose Estimation with a Single RGB Camera](http://gvv.mpi-inf.mpg.de/projects/VNect/), SIGGRAPH 2017.
 
-This is not an official implementation.
-If you want to access the model please send an email to me, thanks.
+This is not an official implementation. Please contact paper author for related model. 
 
 ## Environments
 - Ubuntu 16.04
