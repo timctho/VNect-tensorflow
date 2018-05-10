@@ -7,9 +7,9 @@ from collections import OrderedDict
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--prototxt',
-                    default='/media/tim_ho/HDD1/Projects/VNect-tensorflow/models/vnect_net.prototxt')
+                    default='models/vnect_net.prototxt')
 parser.add_argument('--caffemodel',
-                    default='/media/tim_ho/HDD1/Projects/VNect-tensorflow/models/vnect_model.caffemodel')
+                    default='models/vnect_model.caffemodel')
 parser.add_argument('--output_file',
                     default='vnect.pkl')
 args = parser.parse_args()
