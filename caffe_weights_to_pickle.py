@@ -19,8 +19,8 @@ if __name__ == '__main__':
     pkl_weights = OrderedDict()
 
     net = caffe.Net(args.prototxt,
-                    args.caffemodel,
-                    caffe.TEST)
+                    caffe.TEST,
+                    weights=args.caffemodel)
 
     for layer in net.params.keys():
         print(layer)
