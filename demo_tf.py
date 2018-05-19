@@ -62,11 +62,10 @@ def demo_single_image():
     joints_2d = np.zeros(shape=(args.num_of_joints, 2), dtype=np.int32)
     joints_3d = np.zeros(shape=(args.num_of_joints, 3), dtype=np.float32)
 
-
+    # Load Image
     img_path = args.test_img
     t1 = time.time()
     input_batch = []
-
     cam_img = utils.read_square_image(img_path, '', args.input_size, 'IMAGE')
     orig_size_input = cam_img.astype(np.float32)
 
@@ -85,31 +84,8 @@ def demo_single_image():
         feed_dict={model_tf.input_holder: input_batch})
 
     # Average scale outputs
-    hm_size = args.input_size // args.pool_scale
-    hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-    x_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-    y_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-    z_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-    for i in range(len(scales)):
-        rescale = 1.0 / scales[i]
-        scaled_hm = cv2.resize(hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-        scaled_x_hm = cv2.resize(x_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-        scaled_y_hm = cv2.resize(y_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-        scaled_z_hm = cv2.resize(z_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-        mid = [scaled_hm.shape[0] // 2, scaled_hm.shape[1] // 2]
-        hm_avg += scaled_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                  mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-        x_hm_avg += scaled_x_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                    mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-        y_hm_avg += scaled_y_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                    mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-        z_hm_avg += scaled_z_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                    mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-    hm_avg /= len(scales)
-    x_hm_avg /= len(scales)
-    y_hm_avg /= len(scales)
-    z_hm_avg /= len(scales)
-
+    [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg] = average_scale_outputs(args.input_size, args.pool_scale, args.num_of_joints, scales, hm, x_hm, y_hm, z_hm)
+    
     # Get 2d joints
     utils.extract_2d_joint_from_heatmap(hm_avg, args.input_size, joints_2d)
 
@@ -200,30 +176,7 @@ def demo_webcam():
             feed_dict={model_tf.input_holder: input_batch})
 
         # Average scale outputs
-        hm_size = args.input_size // args.pool_scale
-        hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-        x_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-        y_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-        z_hm_avg = np.zeros(shape=(hm_size, hm_size, args.num_of_joints))
-        for i in range(len(scales)):
-            rescale = 1.0 / scales[i]
-            scaled_hm = cv2.resize(hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-            scaled_x_hm = cv2.resize(x_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-            scaled_y_hm = cv2.resize(y_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-            scaled_z_hm = cv2.resize(z_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
-            mid = [scaled_hm.shape[0] // 2, scaled_hm.shape[1] // 2]
-            hm_avg += scaled_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                      mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-            x_hm_avg += scaled_x_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-            y_hm_avg += scaled_y_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-            z_hm_avg += scaled_z_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
-                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
-        hm_avg /= len(scales)
-        x_hm_avg /= len(scales)
-        y_hm_avg /= len(scales)
-        z_hm_avg /= len(scales)
+        [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg] = average_scale_outputs(args.input_size, args.pool_scale, args.num_of_joints, scales, hm, x_hm, y_hm, z_hm)
 
         # Get 2d joints
         utils.extract_2d_joint_from_heatmap(hm_avg, args.input_size, joints_2d)
@@ -266,6 +219,32 @@ def demo_webcam():
         print('FPS: {:>2.2f}'.format(1 / (time.time() - t1)))
 
 
+def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_hm, y_hm, z_hm):
+	hm_size = input_size // pool_scale
+	hm_avg = np.zeros(shape=(hm_size, hm_size, num_of_joints))
+	x_hm_avg = np.zeros(shape=(hm_size, hm_size, num_of_joints))
+	y_hm_avg = np.zeros(shape=(hm_size, hm_size, num_of_joints))
+	z_hm_avg = np.zeros(shape=(hm_size, hm_size, num_of_joints))
+	for i in range(len(scales)):
+            rescale = 1.0 / scales[i]
+            scaled_hm = cv2.resize(hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
+            scaled_x_hm = cv2.resize(x_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
+            scaled_y_hm = cv2.resize(y_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
+            scaled_z_hm = cv2.resize(z_hm[i, :, :, :], (0, 0), fx=rescale, fy=rescale, interpolation=cv2.INTER_LINEAR)
+            mid = [scaled_hm.shape[0] // 2, scaled_hm.shape[1] // 2]
+            hm_avg += scaled_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
+                      mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
+            x_hm_avg += scaled_x_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
+                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
+            y_hm_avg += scaled_y_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
+                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
+            z_hm_avg += scaled_z_hm[mid[0] - hm_size // 2: mid[0] + hm_size // 2,
+                        mid[1] - hm_size // 2: mid[1] + hm_size // 2, :]
+	hm_avg /= len(scales)
+	x_hm_avg /= len(scales)
+	y_hm_avg /= len(scales)
+	z_hm_avg /= len(scales)
+	return [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg]
 
 if __name__ == '__main__':
 
