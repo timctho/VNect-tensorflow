@@ -12,6 +12,9 @@ def read_square_image(file, cam, boxsize, type):
     # from webcam
     elif type == 'WEBCAM':
         _, oriImg = cam.read()
+    # from realsense
+    elif type == 'REALSENSE':
+        oriImg = np.asanyarray(cam.get_data())
 
     scale = boxsize / (oriImg.shape[0] * 1.0)
     imageToTest = cv2.resize(oriImg, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LANCZOS4)
