@@ -7,13 +7,13 @@ from OpenGL.GL import *
 
 def read_square_image(file, cam, boxsize, type):
     # from file
-    if type == 'IMAGE':
+    if type == 'image':
         oriImg = cv2.imread(file)
     # from webcam
-    elif type == 'WEBCAM':
+    elif type == 'webcam':
         _, oriImg = cam.read()
     # from realsense
-    elif type == 'REALSENSE':
+    elif type == 'realsense':
         oriImg = np.asanyarray(cam.get_data())
 
     scale = boxsize / (oriImg.shape[0] * 1.0)
