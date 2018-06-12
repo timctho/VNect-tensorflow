@@ -165,5 +165,4 @@ def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_h
 	return [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg]
 
 if __name__ == '__main__':
-
     demo_realsense()

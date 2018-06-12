@@ -12,10 +12,10 @@ from models.nets import vnect_model_bn_folded as vnect_model
 import utils.utils as utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--demo_type', default='webcam')
+parser.add_argument('--demo_type', default='image')
 parser.add_argument('--device', default='cpu')
 parser.add_argument('--model_file', default='models/weights/vnect_tf')
-parser.add_argument('--test_img', default='test_imgs/solo.jpg')
+parser.add_argument('--test_img', default='test_imgs/yuniko.jpg')
 parser.add_argument('--input_size', default=368)
 parser.add_argument('--num_of_joints', default=21)
 parser.add_argument('--pool_scale', default=8)
