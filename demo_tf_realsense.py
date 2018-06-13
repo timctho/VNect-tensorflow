@@ -77,7 +77,7 @@ def demo_realsense():
         frames = pipeline.wait_for_frames()
         cam_img = frames.get_color_frame()
 
-        cam_img = utils.read_square_image('', cam_img, args.input_size, 'REALSENSE')
+        cam_img = utils.read_square_image('', cam_img, args.input_size, 'realsense')
         orig_size_input = cam_img.astype(np.float32)
 
         # Create multi-scale inputs
@@ -103,37 +103,11 @@ def demo_realsense():
         # Get 3d joints
         utils.extract_3d_joints_from_heatmap(joints_2d, x_hm_avg, y_hm_avg, z_hm_avg, args.input_size, joints_3d)
 
-        if args.plot_2d:
-            # Plot 2d joint location
-            joint_map = np.zeros(shape=(args.input_size, args.input_size, 3))
-            for joint_num in range(joints_2d.shape[0]):
-                cv2.circle(joint_map, center=(joints_2d[joint_num][1], joints_2d[joint_num][0]), radius=3,
-                           color=(255, 0, 0), thickness=-1)
-            # Draw 2d limbs
-            utils.draw_limbs_2d(cam_img, joints_2d, limb_parents)
-
+        # Show results
         if args.plot_3d:
-            ax.clear()
-            ax.view_init(azim=-90, elev=-90)
-            ax.set_xlim(-50, 50)
-            ax.set_ylim(-50, 50)
-            ax.set_zlim(-50, 50)
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
-            ax.set_zlabel('z')
-            utils.draw_limbs_3d(joints_3d, limb_parents, ax)
-
-            if args.plot_2d:
-                # Display 2d results
-                concat_img = np.concatenate((cam_img[:, :, ::-1], joint_map), axis=1)
-                ax2.imshow(concat_img.astype(np.uint8))
-            fig.canvas.draw()
-            fig.canvas.flush_events()
-
+            plot_output(ax, ax2, plt, fig, joints_3d, joints_2d, cam_img)
         elif args.plot_2d:
-            concat_img = np.concatenate((cam_img, joint_map), axis=1)
-            cv2.imshow('2D img', concat_img.astype(np.uint8))
-            if cv2.waitKey(1) == ord('q'): break
+            plot_output('', '', '', '', joints_3d, joints_2d, cam_img)
 
         print('FPS: {:>2.2f}'.format(1 / (time.time() - t1)))
 
@@ -163,6 +137,40 @@ def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_h
 	y_hm_avg /= len(scales)
 	z_hm_avg /= len(scales)
 	return [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg]
+
+def plot_output(ax, ax2, plt, fig, joints_3d, joints_2d, cam_img):
+    if args.plot_2d:
+        # Plot 2d joint location
+        joint_map = np.zeros(shape=(args.input_size, args.input_size, 3))
+        for joint_num in range(joints_2d.shape[0]):
+            cv2.circle(joint_map, center=(joints_2d[joint_num][1], joints_2d[joint_num][0]), radius=3,
+                       color=(255, 0, 0), thickness=-1)
+        # Draw 2d limbs
+        utils.draw_limbs_2d(cam_img, joints_2d, limb_parents)
+
+    if args.plot_3d:
+        ax.clear()
+        ax.view_init(azim=-90, elev=-90)
+        ax.set_xlim(-50, 50)
+        ax.set_ylim(-50, 50)
+        ax.set_zlim(-50, 50)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        utils.draw_limbs_3d(joints_3d, limb_parents, ax)
+
+        if args.plot_2d:
+            # Display 2d results
+            concat_img = np.concatenate((cam_img[:, :, ::-1], joint_map), axis=1)
+            ax2.imshow(concat_img.astype(np.uint8))
+        
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
+    elif args.plot_2d:
+        concat_img = np.concatenate((cam_img, joint_map), axis=1)
+        cv2.imshow('2D img', concat_img.astype(np.uint8))
+        cv2.waitKey(1)
 
 if __name__ == '__main__':
     demo_realsense()
