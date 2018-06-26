@@ -11,10 +11,10 @@ from models.nets import vnect_model_bn_folded as vnect_model
 import utils.utils as utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--demo_type', default='image')
+parser.add_argument('--demo_type', default='webcam')
 parser.add_argument('--device', default='cpu')
 parser.add_argument('--model_file', default='models/weights/vnect_tf')
-parser.add_argument('--test_img', default='test_imgs/yuniko.jpg')
+parser.add_argument('--test_img', default='test_imgs/goetze.jpeg')
 parser.add_argument('--input_size', default=368)
 parser.add_argument('--num_of_joints', default=21)
 parser.add_argument('--pool_scale', default=8)
@@ -103,7 +103,7 @@ def demo_single_image():
 def demo_webcam():
     if args.plot_3d:
         plt.ion()
-        fig = plt.figure()
+        fig = plt.figure(1)
         ax = fig.add_subplot(121, projection='3d')
         ax2 = fig.add_subplot(122)
         fig.canvas.draw()
@@ -162,6 +162,10 @@ def demo_webcam():
             plot_output('', '', '', '', joints_3d, joints_2d, cam_img)
 
         print('FPS: {:>2.2f}'.format(1 / (time.time() - t1)))
+
+        if args.plot_3d:
+            if not plt.fignum_exists(1):
+                break
 
 
 def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_hm, y_hm, z_hm):

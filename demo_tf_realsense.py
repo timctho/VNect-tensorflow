@@ -41,7 +41,7 @@ gpu_count = {'GPU':1} if args.device == 'gpu' else {'GPU':0}
 def demo_realsense():
     if args.plot_3d:
         plt.ion()
-        fig = plt.figure()
+        fig = plt.figure(1)
         ax = fig.add_subplot(121, projection='3d')
         ax2 = fig.add_subplot(122)
         fig.canvas.draw()
@@ -110,6 +110,10 @@ def demo_realsense():
             plot_output('', '', '', '', joints_3d, joints_2d, cam_img)
 
         print('FPS: {:>2.2f}'.format(1 / (time.time() - t1)))
+
+        if args.plot_3d:
+            if not plt.fignum_exists(1):
+                break
 
 def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_hm, y_hm, z_hm):
 	hm_size = input_size // pool_scale
