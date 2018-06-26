@@ -3,6 +3,7 @@ import time
 
 import cv2
 import numpy as np
+import pyrealsense2 as rs
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -11,10 +12,8 @@ from models.nets import vnect_model_bn_folded as vnect_model
 import utils.utils as utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--demo_type', default='webcam')
 parser.add_argument('--device', default='cpu')
 parser.add_argument('--model_file', default='models/weights/vnect_tf')
-parser.add_argument('--test_img', default='test_imgs/goetze.jpeg')
 parser.add_argument('--input_size', default=368)
 parser.add_argument('--num_of_joints', default=21)
 parser.add_argument('--pool_scale', default=8)
@@ -38,69 +37,8 @@ scales = [1.0, 0.7]
 # Use gpu or cpu
 gpu_count = {'GPU':1} if args.device == 'gpu' else {'GPU':0}
 
-def demo_single_image():
-    if args.plot_3d:
-        plt.ion()
-        fig = plt.figure()
-        ax = fig.add_subplot(121, projection='3d')
-        ax2 = fig.add_subplot(122)
-        plt.show()
 
-    # Create model
-    model_tf = vnect_model.VNect(args.input_size)
-
-    # Create session
-    sess_config = tf.ConfigProto(device_count=gpu_count)
-    sess = tf.Session(config=sess_config)
-
-    # Restore weights
-    saver = tf.train.Saver()
-    saver.restore(sess, args.model_file)
-
-    # Joints placeholder
-    joints_2d = np.zeros(shape=(args.num_of_joints, 2), dtype=np.int32)
-    joints_3d = np.zeros(shape=(args.num_of_joints, 3), dtype=np.float32)
-
-    # Load Image
-    img_path = args.test_img
-    t1 = time.time()
-    input_batch = []
-    cam_img = utils.read_square_image(img_path, '', args.input_size, 'image')
-    orig_size_input = cam_img.astype(np.float32)
-
-    # Create multi-scale inputs
-    for scale in scales:
-        resized_img = utils.resize_pad_img(orig_size_input, scale, args.input_size)
-        input_batch.append(resized_img)
-
-    input_batch = np.asarray(input_batch, dtype=np.float32)
-    input_batch /= 255.0
-    input_batch -= 0.4
-
-    print("Loading Time: {:>2.2f}".format((time.time() - t1)))
-
-    # Inference
-    [hm, x_hm, y_hm, z_hm] = sess.run(
-        [model_tf.heapmap, model_tf.x_heatmap, model_tf.y_heatmap, model_tf.z_heatmap],
-        feed_dict={model_tf.input_holder: input_batch})
-    print("Inference Time: {:>2.2f}".format((time.time() - t1)))
-    # Average scale outputs
-    [hm_avg, x_hm_avg, y_hm_avg, z_hm_avg] = average_scale_outputs(args.input_size, args.pool_scale, args.num_of_joints, scales, hm, x_hm, y_hm, z_hm)
-    
-    # Get 2d joints
-    utils.extract_2d_joint_from_heatmap(hm_avg, args.input_size, joints_2d)
-
-    # Get 3d joints
-    utils.extract_3d_joints_from_heatmap(joints_2d, x_hm_avg, y_hm_avg, z_hm_avg, args.input_size, joints_3d)
-
-    print("Extraction Time: {:>2.2f}".format((time.time() - t1)))
-
-    if args.plot_3d:
-        plot_output(ax, ax2, plt, fig, joints_3d, joints_2d, cam_img)
-    elif args.plot_2d:
-        plot_output('', '', '', '', joints_3d, joints_2d, cam_img)
-
-def demo_webcam():
+def demo_realsense():
     if args.plot_3d:
         plt.ion()
         fig = plt.figure(1)
@@ -124,12 +62,22 @@ def demo_webcam():
     joints_3d = np.zeros(shape=(args.num_of_joints, 3), dtype=np.float32)
 
     cam = cv2.VideoCapture(0)
+    pipeline = rs.pipeline()
+    config = rs.config()
+
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+    # Start streaming
+    pipeline.start(config)
 
     while True:
         t1 = time.time()
         input_batch = []
 
-        cam_img = utils.read_square_image('', cam, args.input_size, 'webcam')
+        frames = pipeline.wait_for_frames()
+        cam_img = frames.get_color_frame()
+
+        cam_img = utils.read_square_image('', cam_img, args.input_size, 'realsense')
         orig_size_input = cam_img.astype(np.float32)
 
         # Create multi-scale inputs
@@ -166,7 +114,6 @@ def demo_webcam():
         if args.plot_3d:
             if not plt.fignum_exists(1):
                 break
-
 
 def average_scale_outputs(input_size, pool_scale, num_of_joints, scales, hm, x_hm, y_hm, z_hm):
 	hm_size = input_size // pool_scale
@@ -220,23 +167,14 @@ def plot_output(ax, ax2, plt, fig, joints_3d, joints_2d, cam_img):
             # Display 2d results
             concat_img = np.concatenate((cam_img[:, :, ::-1], joint_map), axis=1)
             ax2.imshow(concat_img.astype(np.uint8))
-        if args.demo_type == 'image':
-            plt.show(block=True)
-        else:
-            fig.canvas.draw()
-            fig.canvas.flush_events()
+        
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
     elif args.plot_2d:
         concat_img = np.concatenate((cam_img, joint_map), axis=1)
         cv2.imshow('2D img', concat_img.astype(np.uint8))
-        if args.demo_type == 'image':
-            cv2.waitKey(0)
-        else:
-            cv2.waitKey(1)
+        cv2.waitKey(1)
 
 if __name__ == '__main__':
-
-    if args.demo_type == 'image':
-        demo_single_image()
-    elif args.demo_type == 'webcam':
-        demo_webcam()
+    demo_realsense()

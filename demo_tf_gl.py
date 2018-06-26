@@ -62,7 +62,7 @@ def demo_single_image():
     t1 = time.time()
     input_batch = []
 
-    cam_img = utils.read_square_image(img_path, '', args.input_size, 'IMAGE')
+    cam_img = utils.read_square_image(img_path, '', args.input_size, 'image')
     orig_size_input = cam_img.astype(np.float32)
 
     # Create multi-scale inputs
@@ -161,7 +161,7 @@ def demo_webcam():
         t1 = time.time()
         input_batch = []
 
-        cam_img = utils.read_square_image('', cam, args.input_size, 'WEBCAM')
+        cam_img = utils.read_square_image('', cam, args.input_size, 'webcam')
         orig_size_input = cam_img.astype(np.float32)
 
         # Create multi-scale inputs
