@@ -80,8 +80,8 @@ def extract_2d_joint_from_heatmap(heatmap, input_size, joints_2d):
 def extract_3d_joints_from_heatmap(joints_2d, x_hm, y_hm, z_hm, input_size, joints_3d):
 
     for joint_num in range(x_hm.shape[2]):
-        coord_2d_y = joints_2d[joint_num][0]
-        coord_2d_x = joints_2d[joint_num][1]
+        coord_2d_x = joints_2d[joint_num][0]
+        coord_2d_y = joints_2d[joint_num][1]
 
         # x_hm_resized = cv2.resize(x_hm, (input_size, input_size))
         # y_hm_resized = cv2.resize(y_hm, (input_size, input_size))
